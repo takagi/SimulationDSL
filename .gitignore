@@ -1,4 +1,6 @@
-*/*.hi
-*/*.o
-*/*~
-*/Makefile
+*.hi
+*.o
+*~
+*.hi-boot
+*.o-boot
+Makefile
