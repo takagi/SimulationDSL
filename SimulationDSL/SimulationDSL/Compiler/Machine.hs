@@ -40,9 +40,9 @@ machineRegister machine symbol
       Nothing -> error ("register not found: " ++ symbol)
   where regs = machineRegisters machine
 
-compileMachine :: Machine -> ExpQ
-compileMachine m
-  | checkMachineRegisterDependency m = compile m
+compileMachine :: [String] -> Machine -> ExpQ
+compileMachine outs m
+  | checkMachineRegisterDependency m = compile outs m
   | otherwise                        = error "compileMachine: invalid machine register dependency"
 
 checkMachineRegisterDependency :: Machine -> Bool

@@ -1,6 +1,8 @@
-module SimulationDSL.Compiler.SimMachine ( compile ) where
+module SimulationDSL.Compiler.SimMachine ( compile
+                                         , printQ ) where
 
 import Language.Haskell.TH
+import SimulationDSL.Compiler.CodeGen ( printQ )
 import SimulationDSL.Compiler.Machine
 import SimulationDSL.Interpreter.SimMachine ( initialValue )
 import SimulationDSL.Language.Equations
@@ -23,7 +25,7 @@ setSimMachineRegisterDependency :: Equations -> Machine -> Machine
 setSimMachineRegisterDependency = setMachineRegisterDependency
                                 . equationsDependency
 
-compile :: EquationsDescription -> ExpQ
-compile = compileMachine
-        . makeSimMachine
-        . analyzedEquationsDescription
+compile :: [String] -> EquationsDescription -> ExpQ
+compile outs = compileMachine outs
+             . makeSimMachine
+             . analyzedEquationsDescription

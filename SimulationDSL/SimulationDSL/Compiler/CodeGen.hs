@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module SimulationDSL.Compiler.CodeGen ( compile ) where
+module SimulationDSL.Compiler.CodeGen ( compile
+                                      , printQ ) where
 
 import qualified Data.Vector as V hiding ( (!) )
 import Data.Vector ( (!) )
@@ -13,10 +14,10 @@ import SimulationDSL.Compiler.Register
 import {-# SOURCE #-} SimulationDSL.Compiler.Machine
 import SimulationDSL.Language.Exp
 
-compile :: Machine -> ExpQ
-compile m = letE (compileLetDecs m xs)
-                  compileLetExp
-  where xs = machineRegisterDependency m
+compile :: [String] -> Machine -> ExpQ
+compile outs m = letE (compileLetDecs m deps)
+                      (compileLetExp deps outs)
+  where deps = machineRegisterDependency m
 
 -- let updateAll = updateX . updateV . updateA
 --     updateX (x,v,a) = ...
@@ -140,11 +141,26 @@ initialConditionDecBodyExp xs = tupE $ map (varE . mkName . flip (++) "0") xs
 
 
 -- let ...
--- in iterate updateAll initialCondition
-compileLetExp :: ExpQ
-compileLetExp = let updateAll = varE $ mkName "updateAll"
-                    initialCondition = varE $ mkName "initialCondition"
-                in [| iterate $(updateAll) $(initialCondition) |]
+-- in map (\(x,v,a,f) -> (x)) $ iterate updateAll initialCondition
+compileLetExp :: [String] -> [String] -> ExpQ
+compileLetExp deps outs
+  = let updateAll        = varE $ mkName "updateAll"
+        initialCondition = varE $ mkName "initialCondition"
+    in [| map $(compileLetExpLam deps outs)
+            $ iterate $(updateAll) $(initialCondition) |]
+
+-- ... (\(x,v,a,f) -> (x)) ...
+compileLetExpLam :: [String] -> [String] -> ExpQ
+compileLetExpLam deps outs = lam1E (compileLetExpLamPat deps)
+                                   (compileLetExpLamExp outs)
+
+-- ... \(x,v,a,f) -> ...
+compileLetExpLamPat :: [String] -> PatQ
+compileLetExpLamPat deps = tupP $ map (varP . mkName) deps
+
+-- ... (x) ...
+compileLetExpLamExp :: [String] -> ExpQ
+compileLetExpLamExp outs = tupE $ map (varE . mkName) outs
 
 compileExp :: Machine -> String -> Exp -> ExpQ
 compileExp m s (Integral exp)

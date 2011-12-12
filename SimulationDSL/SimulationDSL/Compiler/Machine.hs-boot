@@ -12,4 +12,4 @@ module SimulationDSL.Compiler.Machine where
   machineRegisterDependency    :: Machine -> [String]
   addMachineRegister           :: String -> ExpType -> RegisterValue -> Exp -> Machine -> Machine
   setMachineRegisterDependency :: [String] -> Machine -> Machine
-  compileMachine               :: Machine -> ExpQ
+  compileMachine               :: [String] -> Machine -> ExpQ
