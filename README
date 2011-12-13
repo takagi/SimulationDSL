@@ -1,1 +1,1 @@
-SimulationDSL -- An embedded domain dpecific language for particle simulation.
+SimulationDSL -- meta-lingual abstraction for particle simulation, such as N-Body and SPH, in Haskell EDSL
